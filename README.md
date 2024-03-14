@@ -12,24 +12,58 @@
 - Nginx
 - Gunicorn
 
-## 使用方法
+## CentOS环境下的部署
 
-1. 克隆这个仓库到你的本地机器上。
-2. 安装所有的依赖包。你可以使用以下命令进行安装：
+### 1. 更新系统并安装必要的软件包
+sudo yum update
+sudo yum install -y gcc openssl-devel bzip2-devel libffi-devel
 
-```bash
+### 2. 安装Python和pip
+sudo yum install -y python3 python3-pip
+
+### 3. 创建Python虚拟环境
+python3 -m venv myenv
+
+### 4. 激活虚拟环境
+source myenv/bin/activate
+
+### 5. 安装Flask和Gunicorn
+pip install --upgrade pip
+pip install flask gunicorn
+
+### 6. 克隆你的Flask项目
+cd /var/www
+git clone https://github.com/i2no/weka-ai-flask-website.git
+
+### 7. 创建.env文件
+cd weka-ai-flask-website
+sudo cp .env.example .env
+
+### 7. 安装项目依赖
 pip install -r requirements.txt
-```
-3. 配置环境变量
 
-复制 .env.example 文件并重命名为 .env。
-打开 .env 文件并填入你的环境变量值。
+### 8. 配置Gunicorn
+gunicorn -w 4 index:app
 
-4. 运行服务。你可以使用以下命令进行运行：
+### 9. 安装和配置Nginx
+sudo yum install -y nginx
+sudo vim /etc/nginx/conf.d/weka_ai_flask_website.conf
 
-```bash
-python index.py
-```
+#### 在Nginx配置文件中添加以下内容：
+server {
+    listen 80;
+    server_name your_domain_or_IP;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+### 10. 启动并运行你的Flask应用程序
+sudo systemctl start nginx
+sudo systemctl enable nginx
 
 ## 贡献
 
