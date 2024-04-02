@@ -44,12 +44,12 @@ pip install flask gunicorn
 ### 6. 克隆你的Flask项目
 ```bash
 cd /var/www
-git clone https://github.com/i2no/weka-ai-flask-website.git
+git clone https://github.com/i2no/weka-ai-website.git
 ```
 
 ### 7. 创建.env文件
 ```bash
-cd weka-ai-flask-website
+cd weka-ai-website
 sudo cp .env.example .env
 ```
 
@@ -61,7 +61,7 @@ pip install -r requirements.txt
 ### 9. 安装和配置Nginx
 ```bash
 sudo yum install -y nginx
-sudo vim /etc/nginx/conf.d/weka_ai_flask_website.conf
+sudo vim /etc/nginx/conf.d/weka_ai_website.conf
 ```
 
 #### 在Nginx配置文件中添加以下内容：
@@ -87,7 +87,7 @@ sudo systemctl enable nginx
 
 ### 11. 修改nginx配置并重启
 ```bash
-sudo vim /etc/nginx/conf.d/weka_ai_flask_website.conf
+sudo vim /etc/nginx/conf.d/weka_ai_website.conf
 sudo nginx -t && sudo nginx -s reload
 ```
 
@@ -120,10 +120,24 @@ sudo systemctl status redis
 
 ## Flask项目项目版本更新
 
+### 1. 激活虚拟环境
 ```bash
-cd /var/www
-git pull
+cd ~
+source myenv/bin/activate
 ```
+
+### 2. 更新项目, 安装依赖
+```bash
+cd /var/www/weka-ai-website
+git pull
+pip install -r requirements.txt
+```
+
+### 3. 重启Gunicorn
+```bash
+pkill -HUP gunicorn
+gunicorn -w 4 index:app
+``` 
 
 ## 贡献
 
