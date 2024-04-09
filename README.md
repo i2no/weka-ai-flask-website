@@ -11,6 +11,7 @@
 
 - Nginx
 - Gunicorn
+- Supervisor
 
 ## CentOS环境下的部署
 
@@ -41,7 +42,7 @@ pip install --upgrade pip
 pip install flask gunicorn
 ```
 
-### 6. 克隆你的Flask项目
+### 6. 拉取代码
 ```bash
 cd /var/www
 git clone https://github.com/i2no/weka-ai-website.git
@@ -58,7 +59,32 @@ sudo cp .env.example .env
 pip install -r requirements.txt
 ```
 
-### 9. 安装和配置Nginx
+### 9. 安装和配置Supervisor
+```bash
+sudo dnf install epel-release
+sudo dnf install supervisor
+sudo vim /etc/supervisord.d/weka_ai_website.ini
+```
+
+#### 在Supervisor配置文件中添加以下内容：
+```ini
+[program:weka_ai_website]
+command=/home/lighthouse/myenv/bin/gunicorn -w 4 -b 0.0.0.0:8000 --access-logfile /var/www/weka-ai-website/logs/gunicorn_access.log --error-logfile /var/www/weka-ai-website/logs/gunicorn_error.log --daemon index:app
+directory=/var/www/weka-ai-website
+user=root
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/weka_ai_website.err.log
+stdout_logfile=/var/log/supervisor/weka_ai_website.out.log
+```
+
+#### 启动并运行Supervisor
+```bash
+sudo systemctl start supervisord
+sudo systemctl enable supervisord
+```
+
+### 10. 安装和配置Nginx
 ```bash
 sudo yum install -y nginx
 sudo vim /etc/nginx/conf.d/weka_ai_website.conf
@@ -78,16 +104,14 @@ server {
 }
 ```
 
-### 10. 启动并运行你的Flask应用程序
+#### 启动Nginx, 并设置Nginx开机自启
 ```bash
-gunicorn -w 4 index:app
 sudo systemctl start nginx
 sudo systemctl enable nginx
 ```
 
-### 11. 修改nginx配置并重启
+#### 若Nginx配置文件更改，需要重新加载Nginx配置
 ```bash
-sudo vim /etc/nginx/conf.d/weka_ai_website.conf
 sudo nginx -t && sudo nginx -s reload
 ```
 
@@ -118,26 +142,59 @@ sudo systemctl enable redis
 sudo systemctl status redis
 ```
 
-## Flask项目项目版本更新
+## 日常运维
 
-### 1. 激活虚拟环境
+### 查看日志
+
+#### 查看Gunicorn日志
+```bash
+sudo cat /var/www/weka-ai-website/logs/gunicorn_error.log
+```
+
+#### 查看Supervisor日志
+```bash
+sudo cat /var/log/supervisor/weka_ai_website.err.log
+sudo cat /var/log/supervisor/weka_ai_website.out.log
+```
+
+#### 查看Nginx日志
+```bash
+sudo cat /var/log/nginx/error.log
+sudo cat /var/log/nginx/access.log
+```
+
+### 重启服务
+
+#### 重启Gunicorn
+```bash
+sudo supervisorctl restart weka_ai_website
+```
+
+#### 重启Nginx
+```bash
+
+sudo systemctl restart nginx
+```
+
+### 更新项目代码
+
+#### 1. 激活虚拟环境
 ```bash
 cd ~
 source myenv/bin/activate
 ```
 
-### 2. 更新项目, 安装依赖
+#### 2. 更新项目代码, 安装依赖
 ```bash
 cd /var/www/weka-ai-website
-git pull
+sudo git pull
 pip install -r requirements.txt
 ```
 
-### 3. 重启Gunicorn
+#### 3. 重启Supervisor
 ```bash
-pkill -HUP gunicorn
-gunicorn -w 4 index:app
-``` 
+sudo supervisorctl restart weka_ai_website
+```
 
 ## 贡献
 
