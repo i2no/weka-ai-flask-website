@@ -42,3 +42,8 @@ def page_not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html'), 500
+
+# 微信小程序业务域名验证(金销路)
+@app.route('/6QaQTzDptS.txt')
+def weixin_verify():
+    return 'fda7d4f6b0fe34f46c3f06ae9a7b70c4'
