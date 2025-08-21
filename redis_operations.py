@@ -6,7 +6,8 @@ def get_redis_connection():
     r = redis.StrictRedis(
         host=os.environ.get('REDIS_HOST'), 
         port=os.environ.get('REDIS_PORT'),
-        db=os.environ.get('REDIS_DB'))
+        db=os.environ.get('REDIS_DB')),
+        password=os.environ.get('REDIS_PASSWORD')
     return r
 
 def update_redis(domain, template_name):
